@@ -195,6 +195,11 @@ Deployed on **Render**  for backend hosting and API endpoint accessibility.
 
 ---
 
+## Backend Deployment Link:
+
+https://skill-bridge-4-ms4b.onrender.com
+
+
 ## Conclusion
 
 SkillBridge empowers learners to achieve their goals through structured, AI-guided learning paths.  

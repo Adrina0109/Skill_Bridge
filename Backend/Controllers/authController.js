@@ -1,18 +1,16 @@
 import User from "../Models/user.js";
 import jwt from "jsonwebtoken";
 
-// Generate JWT token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
-// Set JWT in HTTP-only cookie
 const sendTokenAsCookie = (res, token) => {
   res.cookie("token", token, {
-    httpOnly: true, // not accessible via JS
-    secure: process.env.NODE_ENV === "production", // HTTPS only in prod
-    sameSite: "none", // protects against CSRF
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
 
@@ -26,18 +24,15 @@ export const registerUser = async (req, res) => {
 
     const user = await User.create({ name, email, password, preferences });
 
-    // Send welcome email (optional)
     try {
       await sendWelcomeEmail(user.email, user.name);
     } catch (e) {
       console.warn("Welcome email failed:", e.message);
     }
 
-    // Generate token and set cookie
     const token = generateToken(user._id);
     sendTokenAsCookie(res, token);
 
-    // Also include token in response body (so frontend can store it in localStorage if desired)
     res.status(201).json({
       success: true,
       message: "User registered successfully",
@@ -67,11 +62,9 @@ export const loginUser = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid email or password" });
 
-    // Generate token and set cookie
     const token = generateToken(user._id);
     sendTokenAsCookie(res, token);
 
-    // Also include token in response body (so frontend can store it in localStorage if desired)
     res.json({
       success: true,
       message: "Logged in successfully",
@@ -89,7 +82,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// Optional: Logout user by clearing cookie
 export const logoutUser = (req, res) => {
   res.cookie("token", "", { httpOnly: true, expires: new Date(0) });
   res.json({ success: true, message: "Logged out successfully" });

@@ -1,21 +1,15 @@
 import Roadmap from "../Models/roadmap.js";
 
-// Update progress (step status or points)
-export const updateProgress= async (req, res) => {
+export const updateProgress = async (req, res) => {
   try {
-  const { id: roadmapId } = req.params; // roadmap ID
-  // stepId will be provided in the request body
-  // console.log(roadmapId);
-  const { stepId, stepOrder, status, pointsEarned } = req.body;
+    const { id: roadmapId } = req.params;
+    const { stepId, stepOrder, status, pointsEarned } = req.body;
 
-    // Find the roadmap by ID
     const roadmap = await Roadmap.findById(roadmapId);
-    // console.log(roadmap)
     if (!roadmap) {
       return res.status(404).json({ message: "Roadmap not found" });
     }
 
-    // Validate status if provided
     const allowedStatuses = ["pending", "in-progress", "completed"];
     if (status && !allowedStatuses.includes(status)) {
       return res.status(400).json({ message: `Invalid status. Allowed: ${allowedStatuses.join(', ')}` });
@@ -23,7 +17,6 @@ export const updateProgress= async (req, res) => {
 
     let updatedStep = null;
 
-    // If stepId is provided in the body, prefer it to identify the step
     if (stepId) {
       const step = roadmap.steps.find((s) => String(s.id) === String(stepId));
       if (!step) {
@@ -33,7 +26,6 @@ export const updateProgress= async (req, res) => {
       if (typeof stepOrder === "number") step.order = stepOrder;
       updatedStep = step;
     } else {
-      // Fallback: identify step by order
       if (typeof stepOrder === "number") {
         const step = roadmap.steps.find((s) => s.order === stepOrder);
         if (!step) {
@@ -44,7 +36,6 @@ export const updateProgress= async (req, res) => {
       }
     }
 
-    // Update points if provided
     if (typeof pointsEarned === "number") {
       roadmap.pointsEarned += pointsEarned;
     }
@@ -61,7 +52,6 @@ export const updateProgress= async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 
 export const getProgress = async (req, res) => {
   try {

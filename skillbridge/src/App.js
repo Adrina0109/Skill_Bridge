@@ -12,7 +12,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Check if user is already logged in (mock)
+  
   useEffect(() => {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
@@ -23,7 +23,7 @@ function App() {
     }
   }, []);
 
-  // Handle successful login/registration
+
   const handleLoginSuccess = (data) => {
     setIsAuthenticated(true);
     if (data.user) {
@@ -31,7 +31,7 @@ function App() {
     }
   };
 
-  // Handle logout
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -61,7 +61,6 @@ function App() {
     }
   };
 
-  // Show auth page if not authenticated
   if (!isAuthenticated) {
     return <AuthPage onLoginSuccess={handleLoginSuccess} />;
   }
@@ -71,7 +70,7 @@ function App() {
       <Navbar currentUser={currentUser} onLogout={handleLogout} />
       
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Hero Section */}
+       
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-stone-900 mb-4">
             Create Your Personalized Learning Path
@@ -82,7 +81,7 @@ function App() {
           </p>
         </div>
 
-        {/* Form Section */}
+        
         <div className="mb-8">
           <LearningPathForm 
             onSubmit={handleGenerateRoadmap}
@@ -90,7 +89,7 @@ function App() {
           />
         </div>
 
-        {/* Results Section */}
+        
         {(roadmap || error) && (
           <div className="mb-8">
             <RoadmapOutput 
@@ -100,7 +99,7 @@ function App() {
           </div>
         )}
 
-        {/* Features Section */}
+        
         <div className="grid md:grid-cols-3 gap-6 mt-16">
           <div className="text-center p-6 bg-white rounded-lg shadow-sm">
             <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -134,7 +133,7 @@ function App() {
         </div>
       </main>
 
-      {/* Footer */}
+     
       <footer className="bg-white border-t border-stone-200 mt-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-stone-600">

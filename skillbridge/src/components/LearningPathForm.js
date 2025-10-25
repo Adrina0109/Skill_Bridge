@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const LearningPathForm = ({ onSubmit, isLoading }) => {
-  // Check if user is authenticated on mount
+  
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -26,7 +26,6 @@ const LearningPathForm = ({ onSubmit, isLoading }) => {
       [name]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -54,7 +53,6 @@ const LearningPathForm = ({ onSubmit, isLoading }) => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Map form data to backend expected format
       const requestData = {
         goal: formData.skill,
         currentLevel: formData.currentState,
@@ -72,7 +70,7 @@ const LearningPathForm = ({ onSubmit, isLoading }) => {
       </h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Skill Input */}
+       
         <div>
           <label htmlFor="skill" className="block text-sm font-medium text-stone-700 mb-2">
             What skill do you want to learn? *
@@ -94,7 +92,6 @@ const LearningPathForm = ({ onSubmit, isLoading }) => {
           )}
         </div>
 
-        {/* Current State */}
         <div>
           <label htmlFor="currentState" className="block text-sm font-medium text-stone-700 mb-2">
             Current Skill Level
@@ -113,7 +110,6 @@ const LearningPathForm = ({ onSubmit, isLoading }) => {
           </select>
         </div>
 
-        {/* Duration */}
         <div>
           <label htmlFor="duration" className="block text-sm font-medium text-stone-700 mb-2">
             How many days do you have? *
@@ -136,7 +132,6 @@ const LearningPathForm = ({ onSubmit, isLoading }) => {
           )}
         </div>
 
-        {/* Learning Format */}
         <div>
           <label htmlFor="learningFormat" className="block text-sm font-medium text-stone-700 mb-2">
             Preferred Learning Format
@@ -155,7 +150,7 @@ const LearningPathForm = ({ onSubmit, isLoading }) => {
           </select>
         </div>
 
-        {/* Submit Button */}
+
         <div className="pt-4">
           <button
             type="submit"

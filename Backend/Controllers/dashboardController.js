@@ -1,25 +1,22 @@
 import User from '../Models/user.js';
 import Roadmap from '../Models/roadmap.js';
-// import Progress from '../models/progressModel.js';
 
 export const getDashboard = async (req, res) => {
   try {
     const userId = req.user?._id;
 
-    
     let user = null;
     if (userId) {
       user = await User.findById(userId).select('-password');
     }
 
-    
     const progress = await Progress.findOne({ user: userId }) || {
       completedMilestones: 3,
       totalMilestones: 10,
       streak: 4,
     };
 
-    const nextStep = "Learn React Basics"; 
+    const nextStep = "Learn React Basics";
 
     const aiTip = "Focus on small projects to strengthen your skills.";
 

@@ -45,14 +45,13 @@ const RoadmapOutput = ({ roadmap, error }) => {
           {steps.map((step, index) => (
             <div key={step.id || index} className="border border-stone-200 rounded-lg p-5 hover:shadow-md transition-shadow">
               <div className="flex items-start space-x-4">
-                {/* Step Number */}
+               
                 <div className="flex-shrink-0">
                   <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold">
                     {step.order || index + 1}
                   </div>
                 </div>
                 
-                {/* Step Content */}
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold text-stone-800 mb-2">
                     {step.title}
@@ -64,7 +63,6 @@ const RoadmapOutput = ({ roadmap, error }) => {
                     </p>
                   )}
 
-                  {/* Resources */}
                   {step.resources && step.resources.length > 0 && (
                     <div className="mt-4">
                       <h4 className="text-sm font-medium text-stone-700 mb-3">
@@ -128,7 +126,6 @@ const RoadmapOutput = ({ roadmap, error }) => {
                     </div>
                   )}
 
-                  {/* Project Section */}
                   {step.project && (step.project.title || step.project.description) && (
                     <div className="mt-4 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
                       <h4 className="text-sm font-medium text-indigo-800 mb-2">

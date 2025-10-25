@@ -4,12 +4,10 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Initialize Gemini client with API key from environment variable
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Function to generate dynamic mock roadmaps based on preferences
 const generateDynamicRoadmap = (skillKey, goal, learningType, currentLevel, dayCount = 30) => {
-  // Adjust roadmap based on day count
+
   const numSteps = dayCount <= 30 ? 3 : dayCount <= 60 ? 4 : 5;
   const hoursPerResource = dayCount <= 30 ? 20 : dayCount <= 60 ? 30 : 45;
   const roadmaps = {
@@ -75,7 +73,6 @@ const generateDynamicRoadmap = (skillKey, goal, learningType, currentLevel, dayC
     ]
   };
 
-  // Check for exact matches first
   if (roadmaps[skillKey]) {
     return roadmaps[skillKey].slice(0, numSteps).map((step, idx) => ({
       ...step,
@@ -84,7 +81,6 @@ const generateDynamicRoadmap = (skillKey, goal, learningType, currentLevel, dayC
     }));
   }
 
-  // Check for partial matches
   for (const [key, roadmap] of Object.entries(roadmaps)) {
     if (skillKey.includes(key)) {
       return roadmap.slice(0, numSteps).map((step, idx) => ({
@@ -95,7 +91,6 @@ const generateDynamicRoadmap = (skillKey, goal, learningType, currentLevel, dayC
     }
   }
 
-  // Default fallback for any language - personalized by learning type AND day count
   const levelPrefix = currentLevel === "Advanced" ? "Advanced" : currentLevel === "Intermediate" ? "Intermediate" : "Beginner";
   const intensityNote = dayCount <= 30 ? " (Fast-track)" : dayCount <= 60 ? " (Standard pace)" : " (In-depth)";
   
@@ -144,7 +139,7 @@ const generateDynamicRoadmap = (skillKey, goal, learningType, currentLevel, dayC
     }
   ];
 
-  // Return only the number of steps appropriate for the timeline
+  
   return steps.slice(0, numSteps);
 };
 
@@ -154,31 +149,29 @@ const generateDynamicRoadmap = (skillKey, goal, learningType, currentLevel, dayC
  */
 export const generateRoadmapController = async (req, res) => {
   try {
-    console.log("🚀 Starting roadmap generation...");
+    console.log("Starting roadmap generation...");
     const { goal, currentLevel, preferences } = req.body;
-    console.log("📝 Request data:", { goal, currentLevel, preferences });
+    console.log("Request data:", { goal, currentLevel, preferences });
 
     if (!goal) {
       return res.status(400).json({ message: "Goal is required" });
     }
 
-    // Parse preferences intelligently
-    let learningType = preferences?.[0] || "Video";
-    // Map frontend values to backend expected values
-    if (learningType === "Data") learningType = "Interactive";
+   
+    let learningType = preferences?.[0] || "Video";    if (learningType === "Data") learningType = "Interactive";
     if (learningType === "Notes") learningType = "Reading";
     
-    const timeline = preferences?.[1] || "30 days"; // e.g., "30 days", "60 days"
-    const dayCount = parseInt(timeline.split(" ")[0]) || 30; // Extract number from "30 days"
+    const timeline = preferences?.[1] || "30 days"; 
+    const dayCount = parseInt(timeline.split(" ")[0]) || 30; 
     
-    // Calculate roadmap structure based on timeline
+    
     const stepsCount = dayCount <= 30 ? "3-4" : dayCount <= 60 ? "4-5" : "5-7";
     const hoursPerWeek = dayCount <= 30 ? "15-20" : dayCount <= 60 ? "10-15" : "7-10";
     const intensity = dayCount <= 30 ? "intensive" : dayCount <= 60 ? "moderate" : "relaxed";
     
-    console.log("📊 Parsed preferences:", { learningType, timeline, dayCount, stepsCount, intensity });
+    console.log(" Parsed preferences:", { learningType, timeline, dayCount, stepsCount, intensity });
 
-    // Create highly detailed prompt for Gemini with specific requirements
+    
     const prompt = `
 You are an expert learning path advisor. Create a personalized, practical learning roadmap for "${goal}".
 
@@ -240,8 +233,8 @@ You are an expert learning path advisor. Create a personalized, practical learni
 Generate the complete roadmap NOW as valid JSON:
     `;
 
-    // Try Gemini API first, fallback to dynamic mock data
-    console.log("🤖 Attempting Gemini API for:", goal);
+    
+    console.log("Attempting Gemini API for:", goal);
     let aiSteps;
     
     try {
@@ -250,27 +243,27 @@ Generate the complete roadmap NOW as valid JSON:
       const response = await result.response;
       
       if (response && response.text) {
-        console.log("✅ Gemini API response received");
+        console.log("Gemini API response received");
         const cleanText = response.text.replace(/```json/g, "").replace(/```/g, "").trim();
         aiSteps = JSON.parse(cleanText);
-        console.log("✅ Successfully parsed Gemini response");
+        console.log(" Successfully parsed Gemini response");
       } else {
         throw new Error("No response text from Gemini");
       }
     } catch (apiError) {
-      console.log("❌ Gemini API failed, using dynamic mock data:", apiError.message);
+      console.log("Gemini API failed, using dynamic mock data:", apiError.message);
       
-      // Generate dynamic mock data based on the skill and preferences
+     
       const skillKey = goal.toLowerCase().trim();
       aiSteps = generateDynamicRoadmap(skillKey, goal, learningType, currentLevel, dayCount);
     }
 
-    // Normalize AI output to match our step/resource schema
+    
     const knownProviders = ["coursera", "edx", "udacity", "linkedin", "pluralsight", "futurelearn", "udemy"];
 
     const normalizeResource = (res) => {
       if (!res) return null;
-      // res can be a string like "Course Name - https://..." or an object
+
       let title = "";
       let url = "";
       let source = "";
@@ -293,7 +286,7 @@ Generate the complete roadmap NOW as valid JSON:
         notes = res.notes || res.description || "";
       }
 
-      // Infer provider from url or source
+
       if (!source && url) {
         const host = (new URL(url)).hostname.toLowerCase();
         for (const p of knownProviders) {
@@ -304,7 +297,6 @@ Generate the complete roadmap NOW as valid JSON:
         }
       }
 
-      // Infer certified if provider is a known provider and not explicitly false
       if (!certified && source) {
         const s = source.toLowerCase();
         if (knownProviders.some((p) => s.includes(p))) certified = true;
@@ -321,10 +313,10 @@ Generate the complete roadmap NOW as valid JSON:
       };
     };
 
-    // Check if user already has a roadmap
+ 
     let userRoadmap = await Roadmap.findOne({ userId: req.user._id });
 
-    // ensure each step contains resources in our expected shape
+ 
     const processedSteps = aiSteps.map((step, idx) => {
       const number = step.number || step.step || idx + 1;
       const title = step.title || step.name || `Step ${number}`;
@@ -332,7 +324,7 @@ Generate the complete roadmap NOW as valid JSON:
       const rawResources = Array.isArray(step.resources) ? step.resources : (step.resources ? [step.resources] : []);
       const resources = rawResources.slice(0, 3).map(normalizeResource).filter(Boolean);
       return {
-        id: undefined, // let mongoose set the default ObjectId for step.id
+        id: undefined,
         title,
         description,
         order: number,
@@ -343,7 +335,6 @@ Generate the complete roadmap NOW as valid JSON:
     });
 
     if (!userRoadmap) {
-      // Create new roadmap
       userRoadmap = await Roadmap.create({
         userId: req.user._id,
         goal,
@@ -352,7 +343,6 @@ Generate the complete roadmap NOW as valid JSON:
         steps: processedSteps,
       });
     } else {
-      // Update existing roadmap
       userRoadmap.goal = goal;
       userRoadmap.currentLevel = currentLevel;
       userRoadmap.preferences = preferences;
@@ -366,7 +356,7 @@ Generate the complete roadmap NOW as valid JSON:
       data: userRoadmap,
     });
   } catch (error) {
-    console.error("❌ Error generating roadmap:", error);
+    console.error(" Error generating roadmap:", error);
     console.error("Error details:", error.message);
     res.status(500).json({ 
       message: "Internal Server Error", 
