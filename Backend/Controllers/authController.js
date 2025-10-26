@@ -1,4 +1,4 @@
-import User from "../Models/user.js";
+import User from "../Models/User.js";
 import jwt from "jsonwebtoken";
 
 const generateToken = (id) => {
@@ -25,11 +25,7 @@ export const registerUser = async (req, res) => {
 
     const user = await User.create({ name, email, password, preferences });
 
-    try {
-      await sendWelcomeEmail(user.email, user.name);
-    } catch (e) {
-      console.warn("Welcome email failed:", e.message);
-    }
+   
 
     const token = generateToken(user._id);
     sendTokenAsCookie(res, token);

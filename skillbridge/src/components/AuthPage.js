@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { registerUser, loginUser } from '../services/api';
 
 const AuthPage = ({ onLoginSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,7 +20,7 @@ const AuthPage = ({ onLoginSuccess }) => {
       [name]: value
     }));
     
-    // Clear error when user starts typing
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -32,21 +33,21 @@ const AuthPage = ({ onLoginSuccess }) => {
   const validateForm = () => {
     const newErrors = {};
     
-    // Email validation
+  
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
     }
     
-    // Password validation
+   
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
     
-    // Registration-specific validation
+    
     if (!isLogin) {
       if (!formData.name.trim()) {
         newErrors.name = 'Name is required';
@@ -70,37 +71,56 @@ const AuthPage = ({ onLoginSuccess }) => {
 
     setIsLoading(true);
     setApiError('');
+    try {
 
-    // Mock authentication - accepts any credentials
-    setTimeout(() => {
-      // Create mock user data
-      const mockUser = {
-        _id: 'mock-user-' + Date.now(),
-        name: isLogin ? 'Demo User' : formData.name,
-        email: formData.email,
-        preferences: {
-          learningStyle: 'project-based',
-          freeOnly: false,
-          certificationRequired: false
-        }
-      };
+     
+      let data;
+      if (isLogin) {
+        data = await loginUser({ email: formData.email, password: formData.password });
+      } else {
+        data = await registerUser({ name: formData.name, email: formData.email, password: formData.password, preferences: { learningStyle: 'project-based', freeOnly: false, certificationRequired: false } });
+      }
 
-      const mockToken = 'mock-token-' + Date.now();
+      if (!data || data.success === false) {
+        setApiError(data?.message || 'Authentication failed');
+        setIsLoading(false);
+        return;
+      }
 
-      // Store token and user data
-      localStorage.setItem('token', mockToken);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+      const token = data.token || (data?.data && data.data.token);
+      const user = data.user || data?.data || null;
 
-      // Call success callback
-      onLoginSuccess({
-        success: true,
-        token: mockToken,
-        user: mockUser,
-        message: isLogin ? 'Logged in successfully' : 'User registered successfully'
-      });
+      if (!isLogin) {
 
+        setIsLogin(true);
+        setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
+        setApiError('Registration successful. Please sign in with your new credentials.');
+        
+        return;
+      }
+
+     
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+      if (user) {
+        
+        localStorage.removeItem('user');
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+
+      onLoginSuccess({ success: true, token, user, message: data.message || 'Logged in' });
+    } catch (err) {
+      console.error('Auth error', err);
+      const status = err?.response?.status;
+      const serverMsg = err?.response?.data?.message || err?.response?.data || null;
+      const msg = serverMsg || err.message || 'Server error';
+      setApiError(`${msg}${status ? ` (status ${status})` : ''}`);
+      
+      if (err?.response?.data) console.error('Server response data:', err.response.data);
+    } finally {
       setIsLoading(false);
-    }, 1000); // Simulate network delay
+    }
   };
 
   const toggleAuthMode = () => {
@@ -118,7 +138,7 @@ const AuthPage = ({ onLoginSuccess }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-stone-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* Header */}
+        
         <div className="text-center">
           <h1 className="text-4xl font-bold text-indigo-600 mb-2">SkillBridge</h1>
           <h2 className="text-2xl font-semibold text-stone-800">
@@ -131,17 +151,17 @@ const AuthPage = ({ onLoginSuccess }) => {
           </p>
         </div>
 
-        {/* Auth Form */}
+        
         <div className="bg-white rounded-lg shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* API Error Message */}
+            
             {apiError && (
               <div className="bg-red-50 border border-red-200 rounded-md p-3">
                 <p className="text-sm text-red-600">{apiError}</p>
               </div>
             )}
 
-            {/* Name Field (Register only) */}
+            
             {!isLogin && (
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-stone-700 mb-2">
@@ -165,7 +185,7 @@ const AuthPage = ({ onLoginSuccess }) => {
               </div>
             )}
 
-            {/* Email Field */}
+           
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-2">
                 Email Address
@@ -187,7 +207,7 @@ const AuthPage = ({ onLoginSuccess }) => {
               )}
             </div>
 
-            {/* Password Field */}
+           
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-2">
                 Password
@@ -209,7 +229,7 @@ const AuthPage = ({ onLoginSuccess }) => {
               )}
             </div>
 
-            {/* Confirm Password Field (Register only) */}
+            
             {!isLogin && (
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-stone-700 mb-2">
@@ -233,7 +253,7 @@ const AuthPage = ({ onLoginSuccess }) => {
               </div>
             )}
 
-            {/* Submit Button */}
+            
             <button
               type="submit"
               disabled={isLoading}
@@ -257,7 +277,7 @@ const AuthPage = ({ onLoginSuccess }) => {
             </button>
           </form>
 
-          {/* Toggle Auth Mode */}
+         
           <div className="mt-6 text-center">
             <button
               type="button"
@@ -272,7 +292,7 @@ const AuthPage = ({ onLoginSuccess }) => {
           </div>
         </div>
 
-        {/* Footer */}
+        
         <p className="text-center text-sm text-stone-500">
           AI-Powered Learning Path Generator
         </p>
